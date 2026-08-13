@@ -34,3 +34,26 @@ jobs:
           # hidden by default, which is why denied tools cannot be
           # named from a normal run.
           show_full_output: true
+
+      # A denied tool call leaves the review half-done, but the action
+      # still reports success — which is how eight broken runs went
+      # unnoticed in eslint-plugin-tailwindcss. Fail loudly instead.
+      - name: Fail on permission denials
+        if: always()
+        env:
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+        run: |
+          if [ -z "$EXECUTION_FILE" ] || [ ! -f "$EXECUTION_FILE" ]; then
+            echo 'No execution file; the action did not get far enough to produce one.'
+            exit 0
+          fi
+          jq -r '[.. | objects | select(has("permission_denials")) | .permission_denials[]]
+                 | unique_by(.tool_use_id)
+                 | .[] | "\(.tool_name)  \(.tool_input | tostring)"' \
+            "$EXECUTION_FILE" > denials.txt
+          if [ -s denials.txt ]; then
+            echo 'Claude Code was denied these tool calls:'
+            cat denials.txt
+            exit 1
+          fi
+          echo 'No permission denials.'
