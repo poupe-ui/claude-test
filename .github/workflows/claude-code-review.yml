@@ -30,6 +30,12 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          # Neither Skill nor Bash is granted by default, and the base
+          # GitHub tools do not cover them. The review flow verifies a
+          # finding before reporting it, so without a shell it goes
+          # quiet rather than posting.
+          claude_args: |
+            --allowedTools "Skill,Bash"
           # The whole point of this repository: the SDK output is
           # hidden by default, which is why denied tools cannot be
           # named from a normal run.
