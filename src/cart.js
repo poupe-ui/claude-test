@@ -13,6 +13,15 @@ export function totalItems(items) {
   return total;
 }
 
+/** Count the units in the given items. */
+export function countUnits(items) {
+  let count = 0;
+  for (const item of items) {
+    count += item.quantity;
+  }
+  return count;
+}
+
 /** Apply a percentage discount to an amount. */
 export function applyDiscount(amount, percent) {
   if (percent < 0 || percent > 100) {
