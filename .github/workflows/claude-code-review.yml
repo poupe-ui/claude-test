@@ -18,9 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          # 0 so the review can diff the head against the base commit;
-          # a depth-1 checkout leaves it with nothing to compare.
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Run Claude Code Review
         id: claude-review
@@ -29,8 +27,58 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          # Without --comment the plugin prints its review to the log
+          # and posts nothing.
+          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }} --comment'
           # The whole point of this repository: the SDK output is
           # hidden by default, which is why denied tools cannot be
           # named from a normal run.
           show_full_output: true
+
+      # A denied tool call leaves the review half-done, but the action
+      # still reports success — which is how eight broken runs went
+      # unnoticed in eslint-plugin-tailwindcss. Fail loudly instead.
+      - name: Fail on permission denials
+        if: always()
+        env:
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+          # Comma-separated tool names whose denial is the configuration
+          # working rather than a fault. None yet.
+          EXPECTED_DENIALS: ''
+        run: |
+          if [ -z "$EXECUTION_FILE" ] || [ ! -f "$EXECUTION_FILE" ]; then
+            echo 'No execution file; the action did not get far enough to produce one.'
+            exit 0
+          fi
+          jq -r --arg expected "$EXPECTED_DENIALS" '
+            ($expected | split(",")) as $ok
+            | [.. | objects | select(has("permission_denials")) | .permission_denials[]]
+            | unique_by(.tool_use_id)
+            | map(select(.tool_name as $n | $ok | index($n) | not))
+            | .[] | "\(.tool_name)  \(.tool_input | tostring)"' \
+            "$EXECUTION_FILE" > denials.txt
+          if [ -s denials.txt ]; then
+            echo 'Claude Code was denied these tool calls:'
+            cat denials.txt
+            exit 1
+          fi
+          echo 'No unexpected permission denials.'
+
+      # Zero denials and a clean exit still say nothing about whether a
+      # review happened: the run that prompted this check ended green,
+      # mid-flow, having posted nothing at all.
+      - name: Fail when the review posted nothing
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" --jq '.[].user.login' > authors.txt
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}/comments" --jq '.[].user.login' >> authors.txt
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}/reviews" --jq '.[].user.login' >> authors.txt
+          if grep -qi claude authors.txt; then
+            echo 'Review present.'
+            exit 0
+          fi
+          echo 'The job finished without posting a review.'
+          exit 1
