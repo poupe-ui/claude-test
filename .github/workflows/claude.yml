@@ -39,6 +39,11 @@ jobs:
           # before it starts any workflow.
           persist-credentials: false
 
+      # Standing in for darvaza-proxy/x's toolchain, so that make runs.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -46,6 +51,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
             actions: read
+          claude_args: '--allowedTools "Bash(make:*)"'
           show_full_output: true
 
       # The last background_tasks_changed record lists the tasks still
