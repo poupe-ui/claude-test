@@ -21,7 +21,12 @@ export function applyDiscount(amount, percent) {
   return amount - (amount * percent) / 100;
 }
 
-/** Tell whether the cart holds no items. */
+/**
+ * Tell whether the cart holds no items.
+ *
+ * @param {Array} items - The cart's line items.
+ * @returns {boolean} True if the cart has no items.
+ */
 export function isEmpty(items) {
   return items.length === 0;
 }
