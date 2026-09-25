@@ -34,6 +34,10 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 1
+          # Left in place, this job's token is what Claude pushes with,
+          # and a push by github-actions[bot] waits for approval
+          # before it starts any workflow.
+          persist-credentials: false
 
       - name: Run Claude Code
         id: claude
