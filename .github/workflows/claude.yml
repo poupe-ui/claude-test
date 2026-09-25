@@ -22,9 +22,9 @@ jobs:
       )
     runs-on: ubuntu-latest
     permissions:
-      # As in darvaza-proxy/x, where the documented workflow grants
-      # write: whether Claude can still push is what this tests.
-      contents: read
+      # Claude pushes with this job's token, as github-actions[bot];
+      # with read, its push is refused and the job still succeeds.
+      contents: write
       pull-requests: write
       issues: write
       id-token: write
