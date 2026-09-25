@@ -45,6 +45,8 @@ jobs:
           if [ -n "$PR" ]; then
             fork=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isCrossRepository --jq .isCrossRepository)
           fi
+          echo "detected fork=$fork, forcing true for the trial"
+          fork=true
           echo "fork=$fork" | tee -a "$GITHUB_OUTPUT"
 
       - name: Checkout repository
