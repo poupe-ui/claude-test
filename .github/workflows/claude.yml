@@ -30,6 +30,23 @@ jobs:
       id-token: write
       actions: read
     steps:
+      # Claude's push goes to this repository, never to a fork, and a
+      # fork's code must not run here. On a fork's pull request Claude
+      # only reads and replies: no toolchain, no make, and an App token
+      # that cannot push. Anything but an explicit "false" counts as a
+      # fork.
+      - name: Check whether the pull request comes from a fork
+        id: origin
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number || (github.event.issue.pull_request && github.event.issue.number) || '' }}
+        run: |
+          fork=false
+          if [ -n "$PR" ]; then
+            fork=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isCrossRepository --jq .isCrossRepository)
+          fi
+          echo "fork=$fork" | tee -a "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
@@ -41,6 +58,7 @@ jobs:
 
       # Standing in for darvaza-proxy/x's toolchain, so that make runs.
       - uses: actions/setup-node@v7
+        if: steps.origin.outputs.fork == 'false'
         with:
           node-version: '24'
 
@@ -51,7 +69,8 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
             actions: read
-          claude_args: '--allowedTools "Bash(make:*)"'
+            contents: ${{ steps.origin.outputs.fork == 'false' && 'write' || 'read' }}
+          claude_args: ${{ steps.origin.outputs.fork == 'false' && '--allowedTools "Bash(make:*)"' || '' }}
           show_full_output: true
 
       # The last background_tasks_changed record lists the tasks still
