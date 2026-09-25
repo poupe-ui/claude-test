@@ -6,7 +6,13 @@ on:
 
 jobs:
   claude-review:
-    if: github.actor != 'renovate[bot]' && !github.event.pull_request.draft
+    # The action refuses bot actors, and the plugin skips a pull
+    # request Claude has already commented on, so Claude's own pushes
+    # are not reviewed.
+    if: |
+      github.actor != 'renovate[bot]' &&
+      github.actor != 'claude[bot]' &&
+      !github.event.pull_request.draft
     runs-on: ubuntu-latest
     permissions:
       # Claude posts through the Claude GitHub App's token, not this
