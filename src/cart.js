@@ -24,7 +24,7 @@ export function mostExpensive(items) {
   return best;
 }
 
-/** Return the least expensive item in the cart. */
+/** Return the least expensive item in the cart, or undefined for an empty cart. */
 export function leastExpensive(items) {
   let best = items[0];
   for (let i = 1; i < items.length; i++) {
