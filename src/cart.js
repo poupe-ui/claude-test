@@ -8,9 +8,16 @@
 export function totalItems(items) {
   let total = 0;
   for (const item of items) {
-    total += item.price * item.quantity;
+    total += lineTotal(item);
   }
   return total;
+}
+
+export function lineTotal(item) {
+  if (!Number.isInteger(item.quantity) || item.quantity < 0) {
+    throw new Error('quantity must be a whole number, not negative');
+  }
+  return item.price * item.quantity;
 }
 
 /** Apply a percentage discount to an amount. */
