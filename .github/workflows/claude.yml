@@ -22,9 +22,9 @@ jobs:
       )
     runs-on: ubuntu-latest
     permissions:
-      # Claude pushes with this job's token, as github-actions[bot];
-      # with read, its push is refused and the job still succeeds.
-      contents: write
+      # Claude pushes with the Claude GitHub App's token, not this
+      # job's, so the job itself only reads the code.
+      contents: read
       pull-requests: write
       issues: write
       id-token: write
