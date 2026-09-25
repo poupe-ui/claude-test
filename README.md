@@ -1,5 +1,7 @@
 # claude-test
 
+<!-- cspell:words darvaza poupe -->
+
 A scratch repository for exercising the Claude Code review workflow
 in isolation, so the poupe-ui repositories that ship code do not
 collect diagnostic commits.
@@ -31,3 +33,5 @@ the real thing with its output visible.
   settings.
 - `src/` — throwaway code that exists only to give the reviewer
   something to look at.
+- `AGENTS.md` and `src/AGENTS.md` — guidance for agents, laid out as
+  in `darvaza-proxy/x`, each with one rule the review can check.
