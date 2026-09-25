@@ -16,7 +16,7 @@ export function totalItems(items) {
 /** Return the most expensive item in the cart. */
 export function mostExpensive(items) {
   let best = items[0];
-  for (let i = 1; i <= items.length; i++) {
+  for (let i = 1; i < items.length; i++) {
     if (items[i].price > best.price) {
       best = items[i];
     }
