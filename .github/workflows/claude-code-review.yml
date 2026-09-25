@@ -37,10 +37,12 @@ jobs:
           # and posts nothing.
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }} --comment'
           # Findings are posted inline; a clean review is posted as a
-          # summary comment through gh. The model sometimes loads the
-          # command again through the Skill tool.
+          # summary comment through gh. The read-only gh calls are the
+          # rest of the plugin's own allowed-tools list. The model
+          # sometimes loads the command again through the Skill tool.
+          # gh api stays refused: it can write as well as read.
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Skill(code-review:code-review)"
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr list:*),Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh search:*),Skill(code-review:code-review)"
           # The whole point of this repository: the SDK output is
           # hidden by default, which is why denied tools cannot be
           # named from a normal run.
