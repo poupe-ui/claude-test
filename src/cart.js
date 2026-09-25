@@ -24,6 +24,17 @@ export function mostExpensive(items) {
   return best;
 }
 
+/** Return the least expensive item in the cart. */
+export function leastExpensive(items) {
+  let best = items[0];
+  for (let i = 1; i < items.length; i++) {
+    if (items[i].price < best.price) {
+      best = items[i];
+    }
+  }
+  return best;
+}
+
 /** Apply a percentage discount to an amount. */
 export function applyDiscount(amount, percent) {
   if (percent < 0 || percent > 100) {
