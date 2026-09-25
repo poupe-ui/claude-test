@@ -20,3 +20,8 @@ export function applyDiscount(amount, percent) {
   }
   return amount - (amount * percent) / 100;
 }
+
+/** Count the lines in the cart. */
+export function countLines(items) {
+  return items.length;
+}
