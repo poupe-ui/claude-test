@@ -20,3 +20,10 @@ export function applyDiscount(amount, percent) {
   }
   return amount - (amount * percent) / 100;
 }
+
+export function addTax(amount, rate) {
+  if (rate < 0) {
+    throw new Error('rate must not be negative');
+  }
+  return amount + (amount * rate) / 100;
+}
