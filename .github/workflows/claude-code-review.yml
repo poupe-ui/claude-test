@@ -12,7 +12,8 @@ jobs:
     if: |
       github.actor != 'renovate[bot]' &&
       github.actor != 'claude[bot]' &&
-      !github.event.pull_request.draft
+      !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       # Claude posts through the Claude GitHub App's token, not this
@@ -28,6 +29,18 @@ jobs:
         with:
           fetch-depth: 1
 
+      # The pull request may change the AGENTS.md files it is reviewed
+      # against, so the review reads the default branch's, kept outside
+      # the workspace.
+      - name: Checkout the default branch's guidance
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: .base
+          fetch-depth: 1
+          persist-credentials: false
+      - run: mv .base "$RUNNER_TEMP/base"
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
@@ -39,6 +52,12 @@ jobs:
           CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: '1'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The review runs unasked, so its App token can comment on the
+          # pull request and do nothing else: the action's default also
+          # writes contents and issues.
+          additional_permissions: |
+            contents: read
+            issues: read
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           # Without --comment the plugin prints its review to the log
@@ -47,14 +66,19 @@ jobs:
           # The action starts the inline-comment server only when this
           # names it. The plugin's own allowed-tools grants the rest.
           # The plugin asks for CLAUDE.md files by name; the guidance
-          # here is in AGENTS.md files.
+          # here is in AGENTS.md files, read from the default branch.
           claude_args: >-
             --allowedTools "mcp__github_inline_comment__create_inline_comment"
+            --add-dir "${{ runner.temp }}/base"
             --append-system-prompt "This repository keeps its guidance for
             agents in AGENTS.md files, at the root and in directories below
             it, and has no CLAUDE.md. Wherever the review asks for CLAUDE.md
             files, rules or compliance, use the AGENTS.md files instead,
-            limited by directory in the same way."
+            limited by directory in the same way, and read them, with the
+            files in the repository they link to, from the default branch's
+            copy in ${{ runner.temp }}/base, not from the working tree. The
+            pull request may change them; where the two disagree, review
+            against the default branch's."
           # The whole point of this repository: the SDK output is
           # hidden by default, which is why denied tools cannot be
           # named from a normal run.
