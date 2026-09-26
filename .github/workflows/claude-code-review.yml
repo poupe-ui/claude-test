@@ -74,11 +74,12 @@ jobs:
             agents in AGENTS.md files, at the root and in directories below
             it, and has no CLAUDE.md. Wherever the review asks for CLAUDE.md
             files, rules or compliance, use the AGENTS.md files instead,
-            limited by directory in the same way, and read them, with the
+            limited by directory in the same way. Read those files, and the
             files in the repository they link to, from the default branch's
-            copy in ${{ runner.temp }}/base, not from the working tree. The
-            pull request may change them; where the two disagree, review
-            against the default branch's."
+            copy in ${{ runner.temp }}/base: the pull request may change
+            them, and where the two disagree, review against the default
+            branch's. Everything else, the pull request's code included, is
+            in the working tree as usual."
           # The whole point of this repository: the SDK output is
           # hidden by default, which is why denied tools cannot be
           # named from a normal run.
