@@ -5,5 +5,5 @@ Guidance for AI agents working in this repository. See
 
 ## Code conventions
 
-- Every exported function carries a JSDoc comment saying what it is
-  for.
+- Exported functions need no JSDoc comment; the name says what they
+  are for.
