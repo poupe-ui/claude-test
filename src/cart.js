@@ -13,7 +13,7 @@ export function totalItems(items) {
   return total;
 }
 
-/** Count the units across the given items, whatever their price is. */
+/** Count the units across the given items, whatever their price. */
 export function countUnits(items) {
   let units = 0;
   for (const item of items) {
