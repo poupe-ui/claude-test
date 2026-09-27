@@ -18,7 +18,7 @@ export function countUnits(items) {
   let units = 0;
   for (const item of items) {
     if (item.quantity < 0) {
-      throw new Error('quantity must not be negative');
+      throw new RangeError('quantity must not be negative');
     }
     units += item.quantity;
   }
