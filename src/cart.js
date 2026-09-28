@@ -20,3 +20,11 @@ export function applyDiscount(amount, percent) {
   }
   return amount - (amount * percent) / 100;
 }
+
+/** Count the units across the given items. */
+export function countUnits(items) {
+  let units = 0;
+  for (const item of items) {
+    units += item.quantity;
+  }
+  return units;
