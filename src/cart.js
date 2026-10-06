@@ -13,6 +13,14 @@ export function totalItems(items) {
   return total;
 }
 
+/** Return the most expensive of the given items. */
+export function priciestItem(items) {
+  if (items.length === 0) {
+    throw new Error('items must not be empty');
+  }
+  return items.reduce((best, item) => (item.price > best.price ? item : best));
+}
+
 /** Apply a percentage discount to an amount. */
 export function applyDiscount(amount, percent) {
   if (percent < 0 || percent > 100) {
