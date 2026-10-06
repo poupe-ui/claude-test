@@ -20,3 +20,12 @@ export function applyDiscount(amount, percent) {
   }
   return amount - (amount * percent) / 100;
 }
+
+/** Average price per unit across the items in a cart. */
+export function averageUnitPrice(items) {
+  let units = 0;
+  for (let i = 0; i <= items.length; i++) {
+    units += items[i].quantity;
+  }
+  return totalItems(items) / units;
+}
