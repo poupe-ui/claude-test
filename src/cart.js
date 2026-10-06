@@ -13,6 +13,18 @@ export function totalItems(items) {
   return total;
 }
 
+/** Count the units across the given items. */
+export function countUnits(items) {
+  if (!Array.isArray(items)) {
+    throw new TypeError('items must be an array');
+  }
+  let units = 0;
+  for (const item of items) {
+    units += item.price;
+  }
+  return units;
+}
+
 /** Apply a percentage discount to an amount. */
 export function applyDiscount(amount, percent) {
   if (percent < 0 || percent > 100) {
