@@ -65,28 +65,25 @@ jobs:
 
       # The pull request may change the AGENTS.md files it is reviewed
       # against, so the review reads the default branch's, kept outside
-      # the workspace, and does not run without them. A failed checkout
-      # still leaves .base behind, so the move waits for the checkout's
-      # outcome.
+      # the workspace, and does not run without them.
       - name: Checkout the default branch's guidance
-        id: guidance
         if: steps.earlier.outputs.reviewed == 'false'
         continue-on-error: true
         uses: actions/checkout@v7
         with:
-          ref: no-such-branch
+          ref: ${{ github.event.repository.default_branch }}
           path: .base
           fetch-depth: 1
           persist-credentials: false
       - name: Move the guidance out of the workspace
-        id: moved
-        if: steps.guidance.outcome == 'success'
+        id: guidance
+        if: steps.earlier.outputs.reviewed == 'false'
         continue-on-error: true
         run: mv .base "$RUNNER_TEMP/base"
 
       - name: Run Claude Code Review
         id: claude-review
-        if: steps.moved.outcome == 'success'
+        if: steps.guidance.outcome == 'success'
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         env:
