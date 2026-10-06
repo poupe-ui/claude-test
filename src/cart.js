@@ -16,7 +16,7 @@ export function totalItems(items) {
 /** Count the units across the given items. */
 export function countUnits(items) {
   if (!Array.isArray(items)) {
-    throw new Error('items must be an array');
+    throw new TypeError('items must be an array');
   }
   let units = 0;
   for (const item of items) {
